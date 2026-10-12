@@ -1,0 +1,8 @@
+# 原始数据（1.9GB，超过GitHub 100MB限制，勿提交）
+vacancy_full.csv
+
+# 可再生成的产物（如需把图表写进报告可去掉对应行）
+__pycache__/
+*.pyc
+
+vacancy_moscow.csv
