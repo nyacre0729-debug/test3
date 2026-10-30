@@ -1,0 +1,11 @@
+# не включать в контекст сборки образа тяжёлые данные и артефакты
+vacancy_full.csv
+vacancy_moscow.csv
+figures/
+results/
+figures_stage2/
+results_stage2/
+__pycache__/
+*.pyc
+.git/
+_shared_api_trudvsem/
