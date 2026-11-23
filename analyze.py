@@ -13,7 +13,25 @@ OUT_DIR, RES_DIR = "figures", "results"
 os.makedirs(OUT_DIR, exist_ok=True)
 os.makedirs(RES_DIR, exist_ok=True)
 
-df = pd.read_csv("vacancy_moscow.csv", sep="|", dtype=str, encoding="utf-8")
+# Источник данных ищем по порядку: 1) VACANCY_CSV, 2) vacancy_moscow.csv в текущей папке,
+# 3) data/vacancy_moscow.csv, 4) vacancy_moscow_it.csv (903 IT-вакансии Москвы, входит в дистрибутив)
+CSV_CANDIDATES = [
+    os.environ.get("VACANCY_CSV", ""),
+    "vacancy_moscow.csv",
+    os.path.join("data", "vacancy_moscow.csv"),
+    "vacancy_moscow_it.csv",
+]
+csv_path = next((p for p in CSV_CANDIDATES if p and os.path.isfile(p)), None)
+if csv_path is None:
+    raise SystemExit(
+        "错误：未找到莫斯科岗位数据文件（已依次查找 VACANCY_CSV、vacancy_moscow.csv、"
+        "data/vacancy_moscow.csv、vacancy_moscow_it.csv）。\n"
+        "解决办法：先运行 `python filter_moscow.py` 生成 vacancy_moscow.csv；或下载/放置 vacancy_moscow_it.csv"
+        "（903 条 IT 岗位样本）；或用环境变量 VACANCY_CSV 指定文件路径。\n"
+        "Ошибка: файл с вакансиями Москвы не найден. Запустите `python filter_moscow.py`, "
+        "либо поместите рядом vacancy_moscow_it.csv (903 IT-вакансии), либо укажите путь переменной VACANCY_CSV.")
+df = pd.read_csv(csv_path, sep="|", dtype=str, encoding="utf-8")
+print(f"Источник данных: {csv_path}, строк: {len(df)}")
 print(f"Всего вакансий в Москве: {len(df)}")
 
 # ---------- 0. Отбор IT-вакансий ----------
