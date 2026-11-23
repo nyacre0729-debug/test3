@@ -27,8 +27,10 @@
 | `download_feed.py` | 单独下载1.9GB原始数据（断点续传） |
 | `filter_moscow.py` | 从原始CSV筛出莫斯科子集 `vacancy_moscow.csv` |
 | `regions_russia.py` | 全俄各地区岗位量统计（背景分析） |
-| `analyze.py` | 5项分析任务 + 全部图表、结果表 |
-| `vacancy_moscow.csv` | 莫斯科数据（65MB，可提交Git） |
+| `analyze.py` | 5项分析任务 + 全部图表、结果表（输出 figures/00–06 与 results/ 下六张分析表） |
+| `predict.py` | 薪资回归预测（线性回归，输出 figures/07、08 与 results/prediction.csv） |
+| `vacancy_moscow.csv` | 莫斯科全量数据（15 876 条，65MB）：由 `filter_moscow.py` 从 `vacancy_full.csv` 生成，已被 .gitignore 排除，不入库 |
+| `vacancy_moscow_it.csv` | 发行版自带的 903 条莫斯科 IT 样本（入库），供演示与复现 |
 | `figures/` `results/` | 图表与分析结果（可再生成） |
 
 ## 运行步骤
@@ -41,18 +43,15 @@ python analyze.py
 # 产物: figures/*.png, results/*.csv
 ```
 
-**发行版直接运行（无需下载、无需入库）**：发行版自带 `vacancy_moscow_it.csv`（903 条莫斯科 IT-вакансии，约 4.4MB，`|` 分隔，UTF-8），`analyze.py` 会自动找到它，一条命令即可复现 `analyze.py` 产出的全部图表（00–06）与结果表：
+**发行版直接运行（无需下载、无需入库）**：发行版自带 `vacancy_moscow_it.csv`（903 条莫斯科 IT-вакансии，约 4.4MB，`|` 分隔，UTF-8）。`analyze.py` 与 `predict.py` 都会按顺序查找数据文件：环境变量 `VACANCY_CSV` → `vacancy_moscow.csv` → `data/vacancy_moscow.csv` → `vacancy_moscow_it.csv`，运行时打印实际使用的文件与行数；全部找不到时给出中俄文提示并退出。
 ```bash
-pip install pandas matplotlib
-python analyze.py
+pip install pandas matplotlib scikit-learn
+python analyze.py   # 产出 figures/00–06 共七张图 + results/ 下六张分析表
+python predict.py   # 产出 figures/07_salary_prediction.png、figures/08_salary_vs_exp.png、results/prediction.csv
 ```
-也可用 Docker：`docker compose up --build --abort-on-container-exit`。
+Docker：`docker compose up --build --abort-on-container-exit` 只运行 `analyze.py`，复现七张图与六张表；`predict.py` 需单独运行（见上）。若宿主机 5432 端口已被占用，改用 `DB_PORT=5433 docker compose up --build --abort-on-container-exit`（PowerShell 中为 `$env:DB_PORT=5433; docker compose up ...`）。
 
-`analyze.py` 按顺序查找数据文件：环境变量 `VACANCY_CSV` → `vacancy_moscow.csv` → `data/vacancy_moscow.csv` → `vacancy_moscow_it.csv`，运行时会打印实际使用的文件与行数；全部找不到时给出中俄文提示。
-
-完整莫斯科数据（15 876 条 / 65MB，即 `vacancy_moscow.csv`）需用 `python filter_moscow.py` 从 1.9GB 官方выгрузка `vacancy_full.csv` 生成，两者均不随仓库提供。同一份 903 条子集可完整复现 `analyze.py` 产出的 `figures/` 与 `results/`，结果与文章一致。
-
-注意：`predict.py`（生成 `figures/07_salary_prediction.png`、`figures/08_salary_vs_exp.png` 与 `results/prediction.csv`）目前仍硬编码读取 `vacancy_moscow.csv`，在仅含 903 条子集的发行版中无法重新运行，发行版中这些文件为已生成的结果。
+完整莫斯科数据（15 876 条 / 65MB，即 `vacancy_moscow.csv`）需用 `python filter_moscow.py` 从 1.9GB 官方выгрузка `vacancy_full.csv` 生成，两者均不随仓库提供（已被 .gitignore 排除）。同一份 903 条子集可完整复现 `analyze.py` 与 `predict.py` 产出的 `figures/` 与 `results/`，与仓库中已生成的结果逐文件一致。
 
 ## 已知数据限制
 - 官方分类字段 `hardSkills` 填充率仅0.6%，技能统计采用标题+职责+要求的正则匹配；

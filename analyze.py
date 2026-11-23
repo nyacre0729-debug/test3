@@ -6,6 +6,11 @@ import pandas as pd
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
+import sys
+try:
+    sys.stdout.reconfigure(encoding="utf-8")
+except Exception:
+    pass
 
 plt.rcParams["axes.unicode_minus"] = False
 
@@ -32,7 +37,10 @@ if csv_path is None:
         "либо поместите рядом vacancy_moscow_it.csv (903 IT-вакансии), либо укажите путь переменной VACANCY_CSV.")
 df = pd.read_csv(csv_path, sep="|", dtype=str, encoding="utf-8")
 print(f"Источник данных: {csv_path}, строк: {len(df)}")
-print(f"Всего вакансий в Москве: {len(df)}")
+print(f"Строк в наборе: {len(df)}")
+if len(df) < 15000:
+    print("(демонстрационная подвыборка: только IT-вакансии Москвы, 903 записи; "
+          "полный набор Москвы — 15 876 записей, см. filter_moscow.py)")
 
 # ---------- 0. Отбор IT-вакансий ----------
 IT_TITLE_PAT = (r"программист|разработчик|python|java|c\+\+|c#|\.net|devops|qa|тестир"
